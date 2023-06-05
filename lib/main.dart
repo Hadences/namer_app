@@ -68,41 +68,75 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
-                  setState(
-                    () {
+      if (constraints.maxWidth < 450) {
+        return Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: page,
+                ),
+              ),
+              SafeArea(
+                child: BottomNavigationBar(
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                        icon: Icon(Icons.favorite), label: 'Favorites'),
+                  ],
+                  currentIndex: selectedIndex,
+                  onTap: (value) => {
+                    setState(() {
                       selectedIndex = value;
-                    },
-                  );
-                },
+                    }),
+                  },
+                ),
               ),
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
+            ],
+          ),
+        );
+      } else {
+        //website mode
+        return Scaffold(
+          body: Row(
+            children: [
+              SafeArea(
+                child: NavigationRail(
+                  extended: constraints.maxWidth >= 600,
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home),
+                      label: Text('Home'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite),
+                      label: Text('Favorites'),
+                    ),
+                  ],
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (value) {
+                    setState(
+                      () {
+                        selectedIndex = value;
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      );
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: page,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
     });
   }
 }
@@ -226,10 +260,19 @@ class BigCard extends StatelessWidget {
       elevation: 5,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
+        child: Wrap(
+          children: [
+            Text(
+              pair.first,
+              style: style.copyWith(fontWeight: FontWeight.w200),
+              semanticsLabel: "${pair.first}",
+            ),
+            Text(
+              pair.second,
+              style: style.copyWith(fontWeight: FontWeight.bold),
+              semanticsLabel: "${pair.second}",
+            ),
+          ],
         ),
       ),
     );
