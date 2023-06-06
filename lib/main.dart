@@ -43,6 +43,14 @@ class MyAppState extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void deleteFavorite(WordPair word) {
+    if (favorites.contains(word)) {
+      //if the word is contained in the list then remove it
+      favorites.remove(word);
+    }
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -141,6 +149,26 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class HistoryList extends StatelessWidget {
+  const HistoryList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var favorites = appState.favorites;
+
+    return ListView(
+      children: [
+        for (var favorite in favorites)
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: Text(favorite.asLowerCase),
+          ),
+      ],
+    );
+  }
+}
+
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
 
@@ -150,7 +178,7 @@ class FavoritesPage extends StatelessWidget {
     var favorites = appState.favorites; //list of favorites
 
     final theme = Theme.of(context);
-    final text_style = theme.textTheme.displaySmall;
+    final textStyle = theme.textTheme.displaySmall;
 
     if (favorites.isEmpty) {
       return Center(
@@ -159,38 +187,66 @@ class FavoritesPage extends StatelessWidget {
       );
     }
 
-    return ListView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(15),
-          child: Text('You current have ${favorites.length} favorites!'),
-        ),
-        for (var favorite in favorites)
-          Padding(
-            padding: EdgeInsets.only(
-              left: 15,
-              right: 15,
-              top: 5,
-              bottom: 5,
-            ),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.favorite,
-                      color: theme.primaryColor,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(favorite.asLowerCase, style: text_style),
-                  ],
-                ),
+          padding: const EdgeInsets.all(20.0),
+          child: Center(
+            child: Text(
+              'You have ${favorites.length} favorites!',
+              style: textStyle!.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
-          )
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: GridView(
+            //shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 600,
+              childAspectRatio: 400 / 80,
+            ),
+            children: [
+              for (var fav in favorites)
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          appState.deleteFavorite(fav);
+                        },
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 50,
+                      ),
+                      Text(
+                        fav.asLowerCase,
+                        style: textStyle.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -254,25 +310,27 @@ class BigCard extends StatelessWidget {
     final style = theme.textTheme.displayMedium!.copyWith(
       color: theme.colorScheme.onPrimary,
     );
-
     return Card(
       color: theme.colorScheme.primary,
       elevation: 5,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Wrap(
-          children: [
-            Text(
-              pair.first,
-              style: style.copyWith(fontWeight: FontWeight.w200),
-              semanticsLabel: "${pair.first}",
-            ),
-            Text(
-              pair.second,
-              style: style.copyWith(fontWeight: FontWeight.bold),
-              semanticsLabel: "${pair.second}",
-            ),
-          ],
+        child: AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: Wrap(
+            children: [
+              Text(
+                pair.first,
+                style: style.copyWith(fontWeight: FontWeight.w200),
+                semanticsLabel: pair.first,
+              ),
+              Text(
+                pair.second,
+                style: style.copyWith(fontWeight: FontWeight.bold),
+                semanticsLabel: pair.second,
+              ),
+            ],
+          ),
         ),
       ),
     );
